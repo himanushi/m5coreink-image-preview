@@ -12,7 +12,7 @@
     "emeraldwalk.runonsave": {
       "commands": [
         {
-          "match": "\\.json$",
+          "match": "\\.json$|index.js$",
           "cmd": "npx biome check --apply ${file}",
         },
         {
