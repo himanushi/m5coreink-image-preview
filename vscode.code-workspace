@@ -1,0 +1,40 @@
+{
+  "folders": [
+    {
+      "path": "./",
+    },
+    {
+      "name": "image-preview",
+      "path": "image-preview",
+    },
+  ],
+  "settings": {
+    "emeraldwalk.runonsave": {
+      "commands": [
+        {
+          "match": "\\.json$",
+          "cmd": "npx biome check --apply ${file}",
+        },
+        {
+          "match": "\\.html$|\\.code-workspace$",
+          "cmd": "npx prettier --write ${file}",
+        },
+      ],
+    },
+    "editor.formatOnSave": true,
+    "clang-format.executable": "/opt/homebrew/bin/clang-format",
+    "editor.tabSize": 2,
+    "cSpell.words": [],
+    "files.associations": {
+      "*.css": "postcss",
+      "m5unified.h": "c",
+      "task.h": "c",
+      "lv_example_get_started_3.c": "cpp",
+      "lv_example_get_started_2.c": "cpp",
+      "lv_example_get_started_1.c": "cpp",
+    },
+  },
+  "extensions": {
+    "recommendations": [],
+  },
+}
