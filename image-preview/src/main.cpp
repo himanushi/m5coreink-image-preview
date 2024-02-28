@@ -14,9 +14,11 @@ void setup() {
   M5.begin();
   display.begin();
   Serial.begin(115200);
+
   WiFi.softAP("M5Stack Wi-Fi AP", "123456789");
   IPAddress IP = WiFi.softAPIP();
-  M5.Lcd.println(IP);
+
+  display.fillScreen(TFT_WHITE);
 
   if (!SPIFFS.begin()) {
     M5.Lcd.println("SPIFFS Mount Failed");
