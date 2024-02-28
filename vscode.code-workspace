@@ -7,6 +7,10 @@
       "name": "image-preview",
       "path": "image-preview",
     },
+    {
+      "name": "server",
+      "path": "server",
+    },
   ],
   "settings": {
     "emeraldwalk.runonsave": {

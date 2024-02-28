@@ -28,20 +28,7 @@ void setup() {
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(SPIFFS, "/index.html", "text/html");
   });
-  server.on("/van.min.js", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(SPIFFS, "/van.min.js", "application/javascript");
-  });
-  server.on("/pico.min.css", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(SPIFFS, "/pico.min.css", "text/css");
-  });
-  server.on(
-      "/setting_options.json", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(SPIFFS, "/setting_options.json", "application/json");
-      });
-  server.on("/setting_values.json", HTTP_GET,
-            [](AsyncWebServerRequest *request) {
-              request->send(SPIFFS, "/setting_values.json", "application/json");
-            });
+  server.serveStatic("/assets/", SPIFFS, "/assets/");
   server.on(
       "/settings", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL,
       [](AsyncWebServerRequest *request, uint8_t *data, size_t len,
