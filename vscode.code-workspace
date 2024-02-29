@@ -16,11 +16,11 @@
     "emeraldwalk.runonsave": {
       "commands": [
         {
-          "match": "\\.json$|index.js$",
+          "match": "\\.(ts|tsx)$",
           "cmd": "npx biome check --apply ${file}",
         },
         {
-          "match": "\\.html$|\\.code-workspace$",
+          "match": "\\.json$|\\.html$|\\.code-workspace$",
           "cmd": "npx prettier --write ${file}",
         },
       ],
