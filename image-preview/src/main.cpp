@@ -76,6 +76,7 @@ void setup() {
               sprite.drawPixel(x, y, color);
             }
           }
+
           sprite.pushSprite(0, 0);
           receivedData = "";
 
