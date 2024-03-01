@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "preact/hooks";
 
 export function App() {
   const [imageSrc, setImageSrc] = useState("");
-  const [binaryMatrix, setBinaryMatrix] = useState<string[]>([]);
   const imageRef = useRef<HTMLImageElement>(null);
   const [cropper, setCropper] = useState<Cropper>();
 
@@ -13,8 +12,38 @@ export function App() {
     const file = target.files ? target.files[0] : null;
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
-        setImageSrc(e.target?.result as string);
+      reader.onload = (e: any) => {
+        const img = new Image();
+        img.onload = () => {
+          const maxWidth = 800;
+          const maxHeight = 800;
+          let { width, height } = img;
+
+          if (width > height) {
+            if (width > maxWidth) {
+              height *= maxWidth / width;
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width *= maxHeight / height;
+              height = maxHeight;
+            }
+          }
+
+          // canvasを使用して画像をリサイズ
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return;
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // リサイズした画像のデータURLを取得して状態に設定
+          const resizedImgUrl = canvas.toDataURL("image/jpeg");
+          setImageSrc(resizedImgUrl);
+        };
+        img.src = e.target.result as string;
       };
       reader.readAsDataURL(file);
     }
@@ -35,31 +64,6 @@ export function App() {
   }, [imageSrc]);
 
   const uploadImage = () => {
-    if (binaryMatrix.length === 0) {
-      alert("画像が選択されていません。");
-      return;
-    }
-    fetch("/upload", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ data: binaryMatrix }),
-    })
-      .then((response) => {
-        if (response.ok) {
-          alert("画像が正常にアップロードされました。");
-        } else {
-          throw new Error("サーバーからエラーが返されました。");
-        }
-      })
-      .catch((error) => {
-        console.error("アップロード中にエラーが発生しました:", error);
-        alert("画像のアップロードに失敗しました。");
-      });
-  };
-
-  const convertToMonochromeAndResize = () => {
     if (!cropper) return;
 
     cropper.getCroppedCanvas({ width: 200, height: 200 }).toBlob((blob) => {
@@ -75,13 +79,9 @@ export function App() {
           const ctx = canvas.getContext("2d");
           canvas.width = 200;
           canvas.height = 200;
-          ctx?.drawImage(img, 0, 0, 200, 200);
-          const imageData = ctx?.getImageData(
-            0,
-            0,
-            canvas.width,
-            canvas.height,
-          );
+          if (!ctx) return;
+          ctx.drawImage(img, 0, 0, 200, 200);
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           if (!imageData) return;
 
           const matrix: string[] = [];
@@ -97,7 +97,25 @@ export function App() {
             }
             matrix.push(row);
           }
-          setBinaryMatrix(matrix);
+
+          fetch("/upload", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ data: matrix }),
+          })
+            .then((response) => {
+              if (response.ok) {
+                alert("画像が正常にアップロードされました。");
+              } else {
+                throw new Error("サーバーからエラーが返されました。");
+              }
+            })
+            .catch((error) => {
+              console.error("アップロード中にエラーが発生しました:", error);
+              alert("画像のアップロードに失敗しました。");
+            });
         };
       };
     }, "image/png");
@@ -111,12 +129,9 @@ export function App() {
           alt="imag"
           ref={imageRef}
           src={imageSrc}
-          style={{ maxWidth: "100%" }}
+          style={{ maxHeight: "200px" }}
         />
       )}
-      <button type="button" onClick={convertToMonochromeAndResize}>
-        トリミングして変換
-      </button>
       <button type="submit" onClick={uploadImage}>
         画像をアップロード
       </button>
