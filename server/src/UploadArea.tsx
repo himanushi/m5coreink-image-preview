@@ -96,7 +96,7 @@ export function UploadArea() {
             matrix.push(row);
           }
 
-          fetch("/upload", {
+          fetch("/images", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

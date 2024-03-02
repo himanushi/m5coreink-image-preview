@@ -47,10 +47,25 @@ void setup() {
   server.serveStatic("/assets/", SPIFFS, "/assets/");
 
   server.on("/images/sort", HTTP_GET, [](AsyncWebServerRequest *request) {
-    if (SPIFFS.exists("/images/sort.json")) {
-      request->send(SPIFFS, "/images/sort.json", "application/json");
+    if (SPIFFS.exists("/images/sort_images.json")) {
+      request->send(SPIFFS, "/images/sort_images.json", "application/json");
     } else {
-      request->send(200, "application/json", "[]");
+      File root = SPIFFS.open("/images/");
+      String fileList = "[";
+      File file = root.openNextFile();
+      while (file) {
+        String fileName = String(file.name());
+        if (fileName.startsWith("/images/image_") &&
+            fileName.endsWith(".json")) {
+          if (fileList != "[")
+            fileList += ", ";
+          fileName = fileName.substring(String("/images/").length());
+          fileList += "\"" + fileName + "\"";
+        }
+        file = root.openNextFile();
+      }
+      fileList += "]";
+      request->send(200, "application/json", fileList);
     }
   });
 
@@ -63,7 +78,7 @@ void setup() {
         }
 
         if (index + len == total) {
-          File file = SPIFFS.open("/images/sort.json", FILE_WRITE);
+          File file = SPIFFS.open("/images/sort_images.json", FILE_WRITE);
           if (!file) {
             request->send(500, "application/json",
                           "{\"status\": \"error\", \"message\": \"Failed to "
@@ -78,7 +93,7 @@ void setup() {
       });
 
   server.on(
-      "/upload", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL,
+      "/images", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL,
       [](AsyncWebServerRequest *request, uint8_t *data, size_t len,
          size_t index, size_t total) {
         for (size_t i = 0; i < len; i++) {
@@ -91,6 +106,20 @@ void setup() {
           if (error) {
             Serial.print(F("deserializeJson() failed: "));
             Serial.println(error.f_str());
+            return;
+          }
+
+          String filePath = "/data/images/image_" + String(millis()) + ".json";
+          File file = SPIFFS.open(filePath, FILE_WRITE);
+          if (!file) {
+            Serial.println("ファイルの作成に失敗しました");
+            request->send(500, "application/json", "{\"status\": \"error\"}");
+            return;
+          }
+          if (serializeJson(doc, file) == 0) {
+            Serial.println("JSONデータの保存に失敗しました");
+            file.close();
+            request->send(500, "application/json", "{\"status\": \"error\"}");
             return;
           }
 

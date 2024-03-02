@@ -1,35 +1,32 @@
 import { useEffect, useState } from "preact/hooks";
 
 export const ImageList = () => {
-  const images = [
-    {
-      data: [...Array(200)].map(() =>
-        [...Array(200)].map(() => Math.floor(Math.random() * 2)).join(""),
-      ),
-    },
-  ];
-
   const [imageUrls, setImageUrls] = useState<string[]>([]);
 
   useEffect(() => {
-    const urls = images.map((image) => {
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      canvas.width = 200;
-      canvas.height = 200;
+    (async () => {
+      const data = await fetch("/images/sort.json");
+      const imageFiles = await data.json();
+      for (const imageFile of imageFiles) {
+        const image = await fetch(`/images/${imageFile}`);
+        const imageData = await image.json();
 
-      image.data.forEach((row, y) => {
-        row.split("").forEach((pixel, x) => {
-          if (!ctx) return;
-          ctx.fillStyle = pixel === "1" ? "black" : "white";
-          ctx.fillRect(x, y, 1, 1);
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = 200;
+        canvas.height = 200;
+
+        imageData.data.forEach((row: string, y: number) => {
+          row.split("").forEach((pixel, x) => {
+            if (!ctx) return;
+            ctx.fillStyle = pixel === "1" ? "black" : "white";
+            ctx.fillRect(x, y, 1, 1);
+          });
         });
-      });
 
-      return canvas.toDataURL();
-    });
-
-    setImageUrls(urls);
+        setImageUrls([canvas.toDataURL()]);
+      }
+    })();
   }, []);
 
   return (
