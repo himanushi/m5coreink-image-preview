@@ -1,9 +1,11 @@
 import Cropper from "cropperjs";
 import "cropperjs/dist/cropper.min.css";
 import { useEffect, useRef, useState } from "preact/hooks";
+import { ImageList } from "./ImageList";
 
 export function UploadArea() {
   const [imageSrc, setImageSrc] = useState("");
+  const [loading, setLoading] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
   const [cropper, setCropper] = useState<Cropper>();
 
@@ -66,6 +68,9 @@ export function UploadArea() {
 
     cropper.getCroppedCanvas({ width: 200, height: 200 }).toBlob((blob) => {
       if (!blob) return;
+
+      setLoading(true);
+
       const reader = new FileReader();
       reader.readAsDataURL(blob);
       reader.onloadend = () => {
@@ -91,7 +96,7 @@ export function UploadArea() {
               const g = imageData.data[index + 1];
               const b = imageData.data[index + 2];
               const brightness = 0.34 * r + 0.5 * g + 0.16 * b;
-              row += brightness > 128 ? "1" : "0";
+              row += brightness > 128 ? "0" : "1";
             }
             matrix.push(row);
           }
@@ -104,6 +109,7 @@ export function UploadArea() {
             body: JSON.stringify({ data: matrix }),
           })
             .then((response) => {
+              setLoading(false);
               if (response.ok) {
                 alert("画像が正常にアップロードされました。");
               } else {
@@ -111,6 +117,7 @@ export function UploadArea() {
               }
             })
             .catch((error) => {
+              setLoading(false);
               console.error("アップロード中にエラーが発生しました:", error);
               alert("画像のアップロードに失敗しました。");
             });
@@ -130,9 +137,10 @@ export function UploadArea() {
           style={{ maxHeight: "200px" }}
         />
       )}
-      <button type="submit" onClick={uploadImage}>
+      <button disabled={loading} type="submit" onClick={uploadImage}>
         画像をアップロード
       </button>
+      {!loading && <ImageList />}
     </div>
   );
 }

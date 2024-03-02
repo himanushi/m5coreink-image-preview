@@ -5,8 +5,9 @@ export const ImageList = () => {
 
   useEffect(() => {
     (async () => {
-      const data = await fetch("/images/sort.json");
+      const data = await fetch("/sort.json");
       const imageFiles = await data.json();
+      const urls = [];
       for (const imageFile of imageFiles) {
         const image = await fetch(`/images/${imageFile}`);
         const imageData = await image.json();
@@ -24,8 +25,9 @@ export const ImageList = () => {
           });
         });
 
-        setImageUrls([canvas.toDataURL()]);
+        urls.push(canvas.toDataURL());
       }
+      setImageUrls(urls);
     })();
   }, []);
 
@@ -46,7 +48,7 @@ export const ImageList = () => {
                 key={index.toString()}
                 src={url}
                 alt="imag"
-                style={{ margin: "10px", width: "50px" }}
+                style={{ width: "100px" }}
               />
             </td>
           </tr>

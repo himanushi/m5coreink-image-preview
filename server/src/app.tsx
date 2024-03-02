@@ -1,4 +1,3 @@
-import { ImageList } from "./ImageList";
 import { UploadArea } from "./UploadArea";
 
 export function App() {
@@ -6,7 +5,6 @@ export function App() {
     <div>
       <h1>Micro Photo Frame</h1>
       <UploadArea />
-      <ImageList />
     </div>
   );
 }
