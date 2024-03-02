@@ -46,6 +46,37 @@ void setup() {
 
   server.serveStatic("/assets/", SPIFFS, "/assets/");
 
+  server.on("/images/sort", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if (SPIFFS.exists("/images/sort.json")) {
+      request->send(SPIFFS, "/images/sort.json", "application/json");
+    } else {
+      request->send(200, "application/json", "[]");
+    }
+  });
+
+  server.on(
+      "/images/sort", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL,
+      [](AsyncWebServerRequest *request, uint8_t *data, size_t len,
+         size_t index, size_t total) {
+        for (size_t i = 0; i < len; i++) {
+          receivedData += (char)data[i];
+        }
+
+        if (index + len == total) {
+          File file = SPIFFS.open("/images/sort.json", FILE_WRITE);
+          if (!file) {
+            request->send(500, "application/json",
+                          "{\"status\": \"error\", \"message\": \"Failed to "
+                          "open file for writing.\"}");
+            receivedData = "";
+            return;
+          }
+          file.close();
+          request->send(200, "application/json", "{\"status\": \"ok\"}");
+          receivedData = "";
+        }
+      });
+
   server.on(
       "/upload", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL,
       [](AsyncWebServerRequest *request, uint8_t *data, size_t len,
