@@ -128,6 +128,7 @@ export function UploadArea() {
 
   return (
     <div>
+      <h2>Upload Image</h2>
       <input type="file" onChange={handleImageChange} accept="image/*" />
       {imageSrc && (
         <img

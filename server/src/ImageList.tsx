@@ -32,28 +32,31 @@ export const ImageList = () => {
   }, []);
 
   return (
-    <table>
-      <thead>
-        <tr>
-          <th scope="col">#</th>
-          <th scope="col">image</th>
-        </tr>
-      </thead>
-      <tbody>
-        {imageUrls.map((url, index) => (
+    <div>
+      <h2>Image List</h2>
+      <table>
+        <thead>
           <tr>
-            <th scope="row">{index + 1}</th>
-            <td>
-              <img
-                key={index.toString()}
-                src={url}
-                alt="imag"
-                style={{ width: "100px" }}
-              />
-            </td>
+            <th scope="col">#</th>
+            <th scope="col">image</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {imageUrls.map((url, index) => (
+            <tr>
+              <th scope="row">{index + 1}</th>
+              <td>
+                <img
+                  key={index.toString()}
+                  src={url}
+                  alt="imag"
+                  style={{ width: "100px" }}
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
