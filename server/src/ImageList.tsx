@@ -1,36 +1,49 @@
 import "css.gg/icons/css/trash.css";
 import { useEffect, useState } from "preact/hooks";
 
+type Image = {
+  name: string;
+  data: string;
+};
+
 export const ImageList = () => {
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [imagesData, setImagesData] = useState<Image[]>([]);
+
+  const loadImages = async () => {
+    setImagesData([]);
+    const data = await fetch("/sort.json");
+    const imageNames = await data.json();
+    for (const name of imageNames) {
+      const image = await fetch(`/images/${name}`);
+      const imageData = await image.json();
+
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = 200;
+      canvas.height = 200;
+
+      imageData.data.forEach((row: string, y: number) => {
+        row.split("").forEach((pixel, x) => {
+          if (!ctx) return;
+          ctx.fillStyle = pixel === "1" ? "black" : "white";
+          ctx.fillRect(x, y, 1, 1);
+        });
+      });
+
+      setImagesData((prev) => [...prev, { name, data: canvas.toDataURL() }]);
+    }
+  };
 
   useEffect(() => {
-    (async () => {
-      const data = await fetch("/sort.json");
-      const imageFiles = await data.json();
-      const urls = [];
-      for (const imageFile of imageFiles) {
-        const image = await fetch(`/images/${imageFile}`);
-        const imageData = await image.json();
-
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        canvas.width = 200;
-        canvas.height = 200;
-
-        imageData.data.forEach((row: string, y: number) => {
-          row.split("").forEach((pixel, x) => {
-            if (!ctx) return;
-            ctx.fillStyle = pixel === "1" ? "black" : "white";
-            ctx.fillRect(x, y, 1, 1);
-          });
-        });
-
-        urls.push(canvas.toDataURL());
-      }
-      setImageUrls(urls);
-    })();
+    loadImages();
   }, []);
+
+  const deleteImage = (name: string) => async () => {
+    await fetch(`/images?name=${name}`, {
+      method: "DELETE",
+    });
+    loadImages();
+  };
 
   return (
     <div>
@@ -44,13 +57,13 @@ export const ImageList = () => {
           </tr>
         </thead>
         <tbody>
-          {imageUrls.map((url, index) => (
+          {imagesData.map((image, index) => (
             <tr>
               <th scope="row">{index + 1}</th>
               <td>
                 <img
                   key={index.toString()}
-                  src={url}
+                  src={image.data}
                   alt="imag"
                   style={{ width: "100px" }}
                 />
@@ -60,6 +73,7 @@ export const ImageList = () => {
                   class="contrast"
                   type="button"
                   style="color:rgb(241, 121, 97)"
+                  onClick={deleteImage(image.name)}
                 >
                   <div class="gg-trash" />
                 </button>

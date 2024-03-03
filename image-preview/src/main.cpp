@@ -36,7 +36,7 @@ void setup() {
   sprite.println("SSID: M5Stack Wi-Fi AP");
   sprite.pushSprite(0, 0);
 
-  if (!SPIFFS.begin()) {
+  if (!SPIFFS.begin(true)) {
     M5.Lcd.println("SPIFFS Mount Failed");
     return;
   }
@@ -115,16 +115,19 @@ void setup() {
           String filePath = "/images/image_" + String(millis()) + ".json";
           File file = SPIFFS.open(filePath, FILE_WRITE);
           if (!file) {
+            file.close();
             Serial.println("ファイルの作成に失敗しました");
             request->send(500, "application/json", "{\"status\": \"error\"}");
             return;
           }
           if (serializeJson(doc, file) == 0) {
-            Serial.println("JSONデータの保存に失敗しました");
             file.close();
+            Serial.println("JSONデータの保存に失敗しました");
             request->send(500, "application/json", "{\"status\": \"error\"}");
             return;
           }
+
+          file.close();
 
           Serial.println("JSON Data received and parsed");
           JsonArray arr = doc["data"];
@@ -146,6 +149,33 @@ void setup() {
           request->send(200, "application/json", "{\"status\": \"ok\"}");
         }
       });
+
+  server.on("/images", HTTP_DELETE, [](AsyncWebServerRequest *request) {
+    if (request->hasParam("name")) {
+      AsyncWebParameter *p = request->getParam("name");
+      String imageName = p->value();
+      String filePath = "/images/" + imageName;
+      if (SPIFFS.exists(filePath)) {
+        if (SPIFFS.remove(filePath)) {
+          request->send(200, "application/json",
+                        "{\"status\": \"ok\", \"message\": \"Image deleted "
+                        "successfully.\"}");
+        } else {
+          request->send(500, "application/json",
+                        "{\"status\": \"error\", \"message\": \"Failed to "
+                        "delete the image file.\"}");
+        }
+      } else {
+        request->send(
+            404, "application/json",
+            "{\"status\": \"error\", \"message\": \"Image file not found.\"}");
+      }
+    } else {
+      request->send(400, "application/json",
+                    "{\"status\": \"error\", \"message\": \"Missing image name "
+                    "parameter.\"}");
+    }
+  });
 
   server.begin();
 }
