@@ -130,14 +130,16 @@ export function UploadArea() {
     <div>
       <h2>Upload Image</h2>
       <input type="file" onChange={handleImageChange} accept="image/*" />
-      {imageSrc && (
-        <img
-          alt="imag"
-          ref={imageRef}
-          src={imageSrc}
-          style={{ maxHeight: "200px" }}
-        />
-      )}
+      <div>
+        {imageSrc && (
+          <img
+            alt="imag"
+            ref={imageRef}
+            src={imageSrc}
+            style={{ maxHeight: "400px" }}
+          />
+        )}
+      </div>
       <button disabled={loading} type="submit" onClick={uploadImage}>
         画像をアップロード
       </button>

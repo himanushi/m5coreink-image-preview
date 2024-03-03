@@ -9,7 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@picocss/pico": "^2.0.4",
     "cropperjs": "^1.6.1",
+    "css.gg": "^2.1.1",
     "preact": "^10.19.5"
   },
   "devDependencies": {

@@ -1,3 +1,4 @@
+import "css.gg/icons/css/trash.css";
 import { useEffect, useState } from "preact/hooks";
 
 export const ImageList = () => {
@@ -38,7 +39,8 @@ export const ImageList = () => {
         <thead>
           <tr>
             <th scope="col">#</th>
-            <th scope="col">image</th>
+            <th scope="col">Image</th>
+            <th scope="col">Delete</th>
           </tr>
         </thead>
         <tbody>
@@ -52,6 +54,15 @@ export const ImageList = () => {
                   alt="imag"
                   style={{ width: "100px" }}
                 />
+              </td>
+              <td>
+                <button
+                  class="contrast"
+                  type="button"
+                  style="color:rgb(241, 121, 97)"
+                >
+                  <div class="gg-trash" />
+                </button>
               </td>
             </tr>
           ))}
