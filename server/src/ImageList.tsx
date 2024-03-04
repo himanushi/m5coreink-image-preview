@@ -69,7 +69,7 @@ export const ImageList = () => {
                   key={index.toString()}
                   src={image.data}
                   alt="imag"
-                  style={{ width: "100px" }}
+                  style={{ width: "100px", cursor: "pointer" }}
                   onClick={putImage(image.name)}
                 />
               </td>
