@@ -136,7 +136,22 @@ void setup() {
           for (int y = 0; y < arr.size(); y++) {
             const char *row = arr[y];
             for (int x = 0; x < strlen(row); x++) {
-              int color = row[x] == '1' ? TFT_BLACK : TFT_WHITE;
+              int color;
+              switch (row[x]) {
+              case '0': // 白
+                color = TFT_WHITE;
+                break;
+              case '1': // グレー
+                // チェッカーボードパターンのダイザリング
+                color = (x + y) % 2 == 0 ? TFT_WHITE : TFT_BLACK;
+                break;
+              case '2': // 黒
+                color = TFT_BLACK;
+                break;
+              default:
+                color = TFT_WHITE;
+                break;
+              }
               sprite.drawPixel(x, y, color);
             }
           }

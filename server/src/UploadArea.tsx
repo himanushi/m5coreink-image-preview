@@ -96,7 +96,13 @@ export function UploadArea() {
               const g = imageData.data[index + 1];
               const b = imageData.data[index + 2];
               const brightness = 0.34 * r + 0.5 * g + 0.16 * b;
-              row += brightness > 128 ? "0" : "1";
+              if (brightness > 200) {
+                row += "0";
+              } else if (brightness > 100) {
+                row += "1";
+              } else {
+                row += "2";
+              }
             }
             matrix.push(row);
           }
