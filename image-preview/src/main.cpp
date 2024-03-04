@@ -150,6 +150,39 @@ void setup() {
         }
       });
 
+  server.on("/images/display", HTTP_GET, [](AsyncWebServerRequest *request) {
+    Serial.println("PUT request received1");
+    if (request->hasParam("name")) {
+      String imageName = request->getParam("name")->value();
+      File file = SPIFFS.open("/images/" + imageName, "r");
+
+      if (file) {
+        DynamicJsonDocument doc(41000);
+        deserializeJson(doc, file);
+
+        sprite.fillScreen(TFT_WHITE);
+
+        JsonArray arr = doc["data"].as<JsonArray>();
+        Serial.println(file.size());
+        Serial.println(arr.size());
+        for (int y = 0; y < arr.size(); y++) {
+          const char *row = arr[y];
+          for (int x = 0; x < strlen(row); x++) {
+            int color = row[x] == '1' ? TFT_BLACK : TFT_WHITE;
+            sprite.drawPixel(x, y, color);
+          }
+        }
+        sprite.pushSprite(0, 0);
+        file.close();
+        request->send(200, "text/plain", "Image displayed");
+      } else {
+        request->send(404, "text/plain", "File not found");
+      }
+    } else {
+      request->send(400, "text/plain", "Name parameter is missing");
+    }
+  });
+
   server.on("/images", HTTP_DELETE, [](AsyncWebServerRequest *request) {
     if (request->hasParam("name")) {
       AsyncWebParameter *p = request->getParam("name");

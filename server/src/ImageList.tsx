@@ -45,6 +45,10 @@ export const ImageList = () => {
     loadImages();
   };
 
+  const putImage = (name: string) => async () => {
+    await fetch(`/images/display?name=${name}`);
+  };
+
   return (
     <div>
       <h2>Image List</h2>
@@ -66,6 +70,7 @@ export const ImageList = () => {
                   src={image.data}
                   alt="imag"
                   style={{ width: "100px" }}
+                  onClick={putImage(image.name)}
                 />
               </td>
               <td>
