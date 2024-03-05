@@ -25,7 +25,8 @@ export const ImageList = () => {
       imageData.data.forEach((row: string, y: number) => {
         row.split("").forEach((pixel, x) => {
           if (!ctx) return;
-          ctx.fillStyle = pixel === "1" ? "black" : "white";
+          ctx.fillStyle =
+            pixel === "0" ? "white" : pixel === "1" ? "gray" : "black";
           ctx.fillRect(x, y, 1, 1);
         });
       });
