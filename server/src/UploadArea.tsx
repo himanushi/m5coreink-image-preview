@@ -147,7 +147,7 @@ export function UploadArea() {
         )}
       </div>
       <button disabled={loading} type="submit" onClick={uploadImage}>
-        画像をアップロード
+        Upload Image
       </button>
       {!loading && <ImageList />}
     </div>
