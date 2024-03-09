@@ -71,64 +71,69 @@ export function UploadArea() {
 
       setLoading(true);
 
-      const reader = new FileReader();
-      reader.readAsDataURL(blob);
-      reader.onloadend = () => {
-        const base64data = reader.result;
-        const img = new Image();
-        img.src = base64data as string;
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          const ctx = canvas.getContext("2d");
-          canvas.width = 200;
-          canvas.height = 200;
-          if (!ctx) return;
-          ctx.drawImage(img, 0, 0, 200, 200);
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          if (!imageData) return;
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 200;
+        canvas.height = 200;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
 
-          const matrix: string[] = [];
-          for (let y = 0; y < imageData.height; y++) {
-            let row = "";
-            for (let x = 0; x < imageData.width; x++) {
-              const index = (y * imageData.width + x) * 4;
-              const r = imageData.data[index];
-              const g = imageData.data[index + 1];
-              const b = imageData.data[index + 2];
-              const brightness = 0.34 * r + 0.5 * g + 0.16 * b;
-              if (brightness > 200) {
-                row += "0";
-              } else if (brightness > 100) {
-                row += "1";
-              } else {
-                row += "2";
-              }
-            }
-            matrix.push(row);
+        ctx.drawImage(img, 0, 0, 200, 200);
+
+        const imageData = ctx.getImageData(0, 0, 200, 200);
+        for (let i = 0; i < imageData.data.length; i += 4) {
+          const red = imageData.data[i];
+          const green = imageData.data[i + 1];
+          const blue = imageData.data[i + 2];
+          // グレースケール値を計算
+          const grayscale = red * 0.3 + green * 0.59 + blue * 0.11;
+
+          // 白、黒、グレーに対応するしきい値を設定
+          let color: number;
+          if (grayscale > 200) {
+            color = 255; // 白
+          } else if (grayscale > 100) {
+            color = 128; // グレー
+          } else {
+            color = 0; // 黒
           }
 
-          fetch("/images", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ data: matrix }),
+          // RGB値を更新
+          imageData.data[i] = color;
+          imageData.data[i + 1] = color;
+          imageData.data[i + 2] = color;
+        }
+        ctx.putImageData(imageData, 0, 0);
+
+        // Base64エンコードされた画像データを取得
+        const base64Data = canvas.toDataURL("image/png");
+        // JSONオブジェクトを作成
+        const data = { data: base64Data };
+
+        // JSONオブジェクトをサーバーにPOSTする
+        fetch("/images/upload", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        })
+          .then((response) => {
+            setLoading(false);
+            if (response.ok) {
+              alert("画像が正常にアップロードされました。");
+            } else {
+              throw new Error("サーバーからエラーが返されました。");
+            }
           })
-            .then((response) => {
-              setLoading(false);
-              if (response.ok) {
-                alert("画像が正常にアップロードされました。");
-              } else {
-                throw new Error("サーバーからエラーが返されました。");
-              }
-            })
-            .catch((error) => {
-              setLoading(false);
-              console.error("アップロード中にエラーが発生しました:", error);
-              alert("画像のアップロードに失敗しました。");
-            });
-        };
+          .catch((error) => {
+            setLoading(false);
+            console.error("アップロード中にエラーが発生しました:", error);
+            alert("画像のアップロードに失敗しました。");
+          });
       };
+      img.src = URL.createObjectURL(blob);
     }, "image/png");
   };
 
